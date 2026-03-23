@@ -1,2 +1,2 @@
 # HOCRUX
-1st Hackathon
+First Hackathon
