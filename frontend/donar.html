@@ -13,22 +13,19 @@
   <input id="quantity" placeholder="Quantity">
   <input id="location" placeholder="Location">
 
-  <button onclick="postFood()">Post Food</button>
+  <button onclick="postFood()">Post</button>
 </div>
 
+<script src="script.js"></script>
 <script>
 function postFood() {
-  fetch("http://localhost:5000/food", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      title: document.getElementById("title").value,
-      quantity: document.getElementById("quantity").value,
-      location: document.getElementById("location").value
-    })
-  })
-  .then(res => res.json())
-  .then(() => alert("Food Posted!"));
+  addFood(
+    document.getElementById("title").value,
+    document.getElementById("quantity").value,
+    document.getElementById("location").value
+  );
+
+  alert("Food Posted!");
 }
 </script>
 

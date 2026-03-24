@@ -7,7 +7,7 @@
 <body>
 
 <div class="container">
-  <h2>HungerBridge Login</h2>
+  <h2>HungerBridge</h2>
 
   <select id="role">
     <option value="donor">Donor</option>
@@ -22,9 +22,9 @@
 function login() {
   let role = document.getElementById("role").value;
 
-  if(role === "donor") window.location = "donor.html";
-  if(role === "ngo") window.location = "ngo.html";
-  if(role === "volunteer") window.location = "volunteer.html";
+  if(role === "donor") location.href = "donor.html";
+  if(role === "ngo") location.href = "ngo.html";
+  if(role === "volunteer") location.href = "volunteer.html";
 }
 </script>
 
