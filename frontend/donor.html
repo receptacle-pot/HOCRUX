@@ -1,74 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Donor - HungerBridge</title>
+  <title>Donor</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-  <h2>🍛 Post Food</h2>
+  <h2> Post Food</h2>
 
   <input id="title" placeholder="Food Name">
   <input id="quantity" placeholder="Quantity">
   <input id="location" placeholder="Location">
 
-  <p><b>Select Food Quality:</b></p>
-
-  <label>
-    <input type="radio" name="quality" value="Good" checked> Good
-  </label><br>
-
-  <label>
-    <input type="radio" name="quality" value="Better"> Better
-  </label><br>
-
-  <label>
-    <input type="radio" name="quality" value="Best"> Best
-  </label><br>
-
-  <label>
-    <input type="radio" name="quality" value="Excellent"> Excellent
-  </label><br><br>
-
-  <button onclick="postFood()">🚀 Post Food</button>
+  <button onclick="postFood()"> Post Food</button>
 </div>
 
 <script>
 function postFood() {
-  const title = document.getElementById("title").value;
-  const quantity = document.getElementById("quantity").value;
-  const location = document.getElementById("location").value;
-  const quality = document.querySelector('input[name="quality"]:checked').value;
-
-  if(!title || !quantity || !location) {
-    alert("Please fill all fields!");
-    return;
-  }
-
   fetch("http://127.0.0.1:5000/food", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      title: title,
-      quantity: quantity,
-      location: location,
-      quality: quality
+      title: document.getElementById("title").value,
+      quantity: document.getElementById("quantity").value,
+      location: document.getElementById("location").value
     })
   })
   .then(res => res.json())
-  .then(() => {
-    alert("✅ Food Posted Successfully!");
-    
-    // Clear fields after submit
-    document.getElementById("title").value = "";
-    document.getElementById("quantity").value = "";
-    document.getElementById("location").value = "";
-  })
-  .catch(err => {
-    alert("❌ Error posting food");
-    console.log(err);
-  });
+  .then(() => alert("Food Posted!"));
 }
 </script>
 
