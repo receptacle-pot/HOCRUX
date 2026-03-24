@@ -45,22 +45,3 @@ function deliverFood(id) {
   saveFood(data);
 }
 
-<script>
-function postFood() {
-
-  let quality = document.getElementById("quality").value;
-
-  fetch("http://127.0.0.1:5000/food", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      title: document.getElementById("title").value,
-      quantity: document.getElementById("quantity").value,
-      location: document.getElementById("location").value,
-      quality: quality
-    })
-  })
-  .then(() => alert("Posted"))
-  .catch(err => console.log(err));
-}
-</script>
