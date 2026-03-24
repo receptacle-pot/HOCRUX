@@ -11,32 +11,34 @@
   <div id="list"></div>
 </div>
 
-<script src="script.js"></script>
 <script>
 function loadFood() {
-  let data = getFood();
-  let html = "";
-
-  data.forEach(f => {
-    if(f.status === "available") {
-      html += `
-        <div class="card">
-          <h3>${f.title}</h3>
-          <p>${f.quantity}</p>
-          <p>${f.location}</p>
-          <button onclick="claim(${f.id})">Claim</button>
-        </div>
-      `;
-    }
-  });
-
-  document.getElementById("list").innerHTML = html;
+  fetch("http://127.0.0.1:5000/food")
+    .then(res => res.json())
+    .then(data => {
+      let html = "";
+      data.forEach(f => {
+        if(f.status === "available") {
+          html += `
+            <div class="card">
+              <h3>${f.title}</h3>
+              <p>${f.quantity}</p>
+              <p>${f.location}</p>
+              <button onclick="claim(${f.id})">Claim</button>
+            </div>
+          `;
+        }
+      });
+      document.getElementById("list").innerHTML = html;
+    });
 }
 
 function claim(id) {
-  claimFood(id);
-  alert("Claimed!");
-  loadFood();
+  fetch("http://127.0.0.1:5000/claim/" + id, {method:"POST"})
+    .then(() => {
+      alert("Claimed!");
+      loadFood();
+    });
 }
 
 loadFood();

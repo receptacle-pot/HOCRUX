@@ -6,12 +6,11 @@ import datetime
 app = Flask(__name__)
 CORS(app)
 
-# 🔗 Connect DB
+# DB connection
 def get_db():
     return sqlite3.connect("hungerbridge.db")
 
-
-# 🟢 Create Table (run once)
+# Create table
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
@@ -32,8 +31,12 @@ def init_db():
 
 init_db()
 
+# Home
+@app.route('/')
+def home():
+    return "HungerBridge Backend Running 🚀"
 
-# ➤ Add Food
+# Add food
 @app.route('/food', methods=['POST'])
 def add_food():
     data = request.json
@@ -46,21 +49,14 @@ def add_food():
     cursor.execute("""
     INSERT INTO food (title, quantity, location, status, expiry)
     VALUES (?, ?, ?, ?, ?)
-    """, (
-        data.get("title"),
-        data.get("quantity"),
-        data.get("location"),
-        "available",
-        expiry
-    ))
+    """, (data['title'], data['quantity'], data['location'], "available", expiry))
 
     conn.commit()
     conn.close()
 
     return jsonify({"message": "Food Added"})
 
-
-# ➤ Get Food
+# Get food
 @app.route('/food', methods=['GET'])
 def get_food():
     conn = get_db()
@@ -83,8 +79,7 @@ def get_food():
     conn.close()
     return jsonify(data)
 
-
-# ➤ Claim Food
+# Claim
 @app.route('/claim/<int:id>', methods=['POST'])
 def claim_food(id):
     conn = get_db()
@@ -96,8 +91,7 @@ def claim_food(id):
 
     return jsonify({"message": "Claimed"})
 
-
-# ➤ Deliver Food
+# Deliver
 @app.route('/deliver/<int:id>', methods=['POST'])
 def deliver_food(id):
     conn = get_db()
@@ -109,28 +103,5 @@ def deliver_food(id):
 
     return jsonify({"message": "Delivered"})
 
-
-# ➤ Delete Expired Food
-@app.route('/cleanup', methods=['GET'])
-def cleanup():
-    now = datetime.datetime.now().isoformat()
-
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("DELETE FROM food WHERE expiry < ?", (now,))
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "Expired removed"})
-
-
-# ➤ Home
-@app.route('/')
-def home():
-    return "HungerBridge Backend Running 🚀"
-
-
-# Run server
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

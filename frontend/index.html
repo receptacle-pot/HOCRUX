@@ -15,11 +15,11 @@
     <option value="volunteer">Volunteer</option>
   </select>
 
-  <button onclick="login()">Enter</button>
+  <button onclick="go()">Enter</button>
 </div>
 
 <script>
-function login() {
+function go() {
   let role = document.getElementById("role").value;
 
   if(role === "donor") location.href = "donor.html";
