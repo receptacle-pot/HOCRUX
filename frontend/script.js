@@ -6,18 +6,18 @@ const FOOD_KEY  = 'hb_food_v3';
 const NOTIF_KEY = 'hb_notifs_v2';
 
 const SAMPLE_FOODS = [
-  { id: 1,  title: 'Biryani & Curries',     quantity: '80 servings', location: 'Wedding Hall, Sangli',  category: 'Cooked Meals', status: 'available', expiry: Date.now() + 1.8*3600000, posted: Date.now() - 20*60000,  donor: 'Sai Celebrations',   priority: 'high',   lat: 16.87, lng: 74.57 },
-  { id: 2,  title: 'Bread & Baked Goods',   quantity: '120 pieces',  location: 'Modern Bakery, Miraj',  category: 'Bakery',       status: 'available', expiry: Date.now() + 3.5*3600000, posted: Date.now() - 45*60000,  donor: 'Modern Bakery',      priority: 'medium', lat: 16.83, lng: 74.65 },
-  { id: 3,  title: 'Fresh Vegetables Mix',  quantity: '30 kg',       location: 'Sangli Market',         category: 'Produce',      status: 'claimed',   expiry: Date.now() + 5*3600000,   posted: Date.now() - 90*60000,  donor: 'Patil Farms',        priority: 'low',    lat: 16.86, lng: 74.56 },
-  { id: 4,  title: 'Corporate Lunch Surplus', quantity: '40 boxes',  location: 'IT Park, Sangli',       category: 'Packaged',     status: 'available', expiry: Date.now() + 2.2*3600000, posted: Date.now() - 15*60000,  donor: 'TechCorp Canteen',   priority: 'high',   lat: 16.88, lng: 74.58 },
-  { id: 5,  title: 'Festival Sweets',       quantity: '15 kg',       location: 'Vishrambaug, Sangli',   category: 'Sweets',       status: 'delivered', expiry: Date.now() - 1*3600000,   posted: Date.now() - 5*3600000, donor: 'Desai Sweets',       priority: 'low',    lat: 16.85, lng: 74.57 },
-  { id: 6,  title: 'Rice & Dal Prep',       quantity: '60 servings', location: 'Kupwad, Sangli',        category: 'Cooked Meals', status: 'claimed',   expiry: Date.now() + 0.8*3600000, posted: Date.now() - 60*60000,  donor: 'Community Kitchen',  priority: 'high',   lat: 16.82, lng: 74.55 },
+  { id: 1,  title: 'Biryani',     quantity: '80 servings', location: 'Nagpur',  category: 'Cooked Meals', status: 'available', expiry: Date.now() + 1.8*3600000, posted: Date.now() - 20*60000,  donor: 'Sai Celebrations',   priority: 'high',   lat: 16.87, lng: 74.57 },
+  { id: 2,  title: 'Bread',   quantity: '120 pieces',  location: 'Nagpur',  category: 'Bakery',       status: 'available', expiry: Date.now() + 3.5*3600000, posted: Date.now() - 45*60000,  donor: 'Modern Bakery',      priority: 'medium', lat: 16.83, lng: 74.65 },
+  { id: 3,  title: 'Curries',  quantity: '30 kg',       location: 'Nagpur',         category: 'Produce',      status: 'claimed',   expiry: Date.now() + 5*3600000,   posted: Date.now() - 90*60000,  donor: 'Patil Farms',        priority: 'low',    lat: 16.86, lng: 74.56 },
+  { id: 4,  title: 'Milk', quantity: '40 boxes',  location: 'Nagpur',       category: 'Packaged',     status: 'available', expiry: Date.now() + 2.2*3600000, posted: Date.now() - 15*60000,  donor: 'TechCorp Canteen',   priority: 'high',   lat: 16.88, lng: 74.58 },
+  { id: 5,  title: 'Sweets',       quantity: '15 kg',       location: 'Nagpur',   category: 'Sweets',       status: 'delivered', expiry: Date.now() - 1*3600000,   posted: Date.now() - 5*3600000, donor: 'Desai Sweets',       priority: 'low',    lat: 16.85, lng: 74.57 },
+  { id: 6,  title: 'Rice',       quantity: '60 servings', location: 'Nagpur',        category: 'Cooked Meals', status: 'claimed',   expiry: Date.now() + 0.8*3600000, posted: Date.now() - 60*60000,  donor: 'Community Kitchen',  priority: 'high',   lat: 16.82, lng: 74.55 },
 ];
 
 const NGOS = [
-  { name: 'Asha Sewa Trust',    location: 'Sangli', lat: 16.86, lng: 74.56 },
-  { name: 'HelpNow Foundation', location: 'Miraj',  lat: 16.83, lng: 74.66 },
-  { name: 'Shree Sai Shelter',  location: 'Kupwad', lat: 16.81, lng: 74.54 },
+  { name: 'Asha Sewa Trust',    location: 'Nagpur', lat: 16.86, lng: 74.56 },
+  { name: 'HelpNow Foundation', location: 'Nagpur',  lat: 16.83, lng: 74.66 },
+  { name: 'Shree Sai Shelter',  location: 'Nagpur', lat: 16.81, lng: 74.54 },
 ];
 
 // ─── Storage helpers ───────────────────────────────────────────────
