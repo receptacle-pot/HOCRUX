@@ -1,48 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>HungerBridge</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hunger Bridge — Real-Time Food Redistribution</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  <h1> Hunger Bridge</h1>
-  <p>Saving food. Saving lives.</p>
+<canvas id="particles"></canvas>
 
-  <div class="card">
-    <h3> Impact</h3>
-    <p id="total"></p>
-    <p id="delivered"></p>
+<div id="landing">
+  <div class="logo-mark">
+    <div class="logo-pulse"></div>
+    <div class="logo-pulse"></div>
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 6C20 6 8 14 8 22C8 28.627 13.373 34 20 34C26.627 34 32 28.627 32 22C32 14 20 6 20 6Z" fill="white" opacity="0.9"/>
+      <path d="M20 12C20 12 14 17 14 22C14 25.314 16.686 28 20 28C23.314 28 26 25.314 26 22C26 17 20 12 20 12Z" fill="#0a0f0d" opacity="0.6"/>
+    </svg>
   </div>
 
-  <select id="role">
-    <option value="donor"> Donor</option>
-    <option value="ngo"> NGO</option>
-    <option value="volunteer"> Volunteer</option>
-  </select>
+  <h1 class="brand">Hunger<span> Bridge</span></h1>
+  <p class="tagline">Real-time food redistribution platform. Connecting surplus to those in need — intelligently, instantly.</p>
 
-  <button onclick="go()">Enter</button>
+  <div class="role-grid">
+    <div class="role-card donor" onclick="location.href='donor.html'">
+      <span class="role-icon">🌾</span>
+      <div class="role-title">Donor</div>
+      <div class="role-desc">Restaurants, households & events with surplus food</div>
+    </div>
+    <div class="role-card ngo" onclick="location.href='ngo.html'">
+      <span class="role-icon">🏛️</span>
+      <div class="role-title">NGO</div>
+      <div class="role-desc">Shelters, food banks & organisations claiming food</div>
+    </div>
+    <div class="role-card volunteer" onclick="location.href='volunteer.html'">
+      <span class="role-icon">🚴</span>
+      <div class="role-title">Volunteer</div>
+      <div class="role-desc">Delivery runners completing the last mile</div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="ls-saved">0</div><div class="stat-label">Meals saved</div></div>
+    <div class="stat"><div class="stat-num" id="ls-active">0</div><div class="stat-label">Active listings</div></div>
+    <div class="stat"><div class="stat-num" id="ls-ngos">0</div><div class="stat-label">NGOs connected</div></div>
+    <div class="stat"><div class="stat-num" id="ls-co2">0</div><div class="stat-label">kg CO₂ saved</div></div>
+  </div>
 </div>
 
+<div id="toast-container"></div>
+
+<script src="script.js"></script>
 <script>
-function go() {
-  let role = document.getElementById("role").value;
-  location.href = role + ".html";
-}
-
-fetch("http://127.0.0.1:5000/food")
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById("total").innerText =
-      "Total Food Posts: " + data.length;
-
-    let delivered = data.filter(f => f.status === "delivered").length;
-
-    document.getElementById("delivered").innerText =
-      "Meals Delivered: " + delivered;
+  // Animate landing counters
+  const targets = { 'ls-saved': 2847, 'ls-active': 34, 'ls-ngos': 12, 'ls-co2': 1340 };
+  Object.entries(targets).forEach(([id, target]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let current = 0;
+    const step = target / 40;
+    const interval = setInterval(() => {
+      current = Math.min(target, current + step);
+      el.textContent = Math.floor(current).toLocaleString();
+      if (current >= target) clearInterval(interval);
+    }, 30);
   });
 </script>
-
 </body>
 </html>
