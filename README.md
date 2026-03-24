@@ -1,5 +1,5 @@
-# HungerBridge
-# 🍛 HungerBridge
+# Hunger Bridge
+# 🍛 Hunger Bridge
 
 ## 🚀 Real-Time Food Rescue System
 
