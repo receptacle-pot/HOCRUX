@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Volunteer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Delivery Tasks</h2>
+  <div id="tasks"></div>
+</div>
+
+<script>
+function loadTasks() {
+  fetch("http://localhost:5000/food")
+    .then(res => res.json())
+    .then(data => {
+      let html = "";
+      data.forEach(f => {
+        if(f.status === "claimed") {
+          html += `
+            <div class="card">
+              <h3>${f.title}</h3>
+              <p>${f.location}</p>
+              <button onclick="deliver('${f._id}')">Deliver</button>
+            </div>
+          `;
+        }
+      });
+      document.getElementById("tasks").innerHTML = html;
+    });
+}
+
+function deliver(id) {
+  fetch("http://localhost:5000/deliver/" + id, {method:"POST"})
+    .then(() => {
+      alert("Delivered!");
+      loadTasks();
+    });
+}
+
+loadTasks();
+</script>
+
+</body>
+</html>
