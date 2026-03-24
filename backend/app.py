@@ -1,72 +1,136 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+import sqlite3
 import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB connection (local)
-client = MongoClient("mongodb://localhost:27017/")
-db = client["hungerbridge"]
-foods = db["foods"]
+# 🔗 Connect DB
+def get_db():
+    return sqlite3.connect("hungerbridge.db")
 
-# Startup Message on start window
-@app.route('/')
-def home():
-    return "HungerBridge Backend Running 🚀"
 
-#Adding food page
+# 🟢 Create Table (run once)
+def init_db():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS food (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        quantity TEXT,
+        location TEXT,
+        status TEXT,
+        expiry TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+init_db()
+
+
+# ➤ Add Food
 @app.route('/food', methods=['POST'])
 def add_food():
     data = request.json
 
-    food = {
-        "title": data.get("title"),
-        "quantity": data.get("quantity"),
-        "location": data.get("location"),
-        "status": "available",
-        "createdAt": datetime.datetime.utcnow(),
-        "expiryTime": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
-    }
+    expiry = (datetime.datetime.now() + datetime.timedelta(hours=2)).isoformat()
 
-    foods.insert_one(food)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO food (title, quantity, location, status, expiry)
+    VALUES (?, ?, ?, ?, ?)
+    """, (
+        data.get("title"),
+        data.get("quantity"),
+        data.get("location"),
+        "available",
+        expiry
+    ))
+
+    conn.commit()
+    conn.close()
+
     return jsonify({"message": "Food Added"})
 
-# Get all food items
+
+# ➤ Get Food
 @app.route('/food', methods=['GET'])
 def get_food():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM food")
+    rows = cursor.fetchall()
+
     data = []
-    for f in foods.find():
-        f["_id"] = str(f["_id"])
-        data.append(f)
+    for row in rows:
+        data.append({
+            "id": row[0],
+            "title": row[1],
+            "quantity": row[2],
+            "location": row[3],
+            "status": row[4],
+            "expiry": row[5]
+        })
+
+    conn.close()
     return jsonify(data)
 
-#Clain food page
-@app.route('/claim/<id>', methods=['POST'])
+
+# ➤ Claim Food
+@app.route('/claim/<int:id>', methods=['POST'])
 def claim_food(id):
-    foods.update_one(
-        {"_id": ObjectId(id)},
-        {"$set": {"status": "claimed"}}
-    )
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE food SET status='claimed' WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
     return jsonify({"message": "Claimed"})
 
-#Deliver food page
-@app.route('/deliver/<id>', methods=['POST'])
+
+# ➤ Deliver Food
+@app.route('/deliver/<int:id>', methods=['POST'])
 def deliver_food(id):
-    foods.update_one(
-        {"_id": ObjectId(id)},
-        {"$set": {"status": "delivered"}}
-    )
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE food SET status='delivered' WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
     return jsonify({"message": "Delivered"})
 
-#Cleanup page to remove expired food items
+
+# ➤ Delete Expired Food
 @app.route('/cleanup', methods=['GET'])
 def cleanup():
-    now = datetime.datetime.utcnow()
-    foods.delete_many({"expiryTime": {"$lt": now}})
+    now = datetime.datetime.now().isoformat()
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM food WHERE expiry < ?", (now,))
+    conn.commit()
+    conn.close()
+
     return jsonify({"message": "Expired removed"})
 
+
+# ➤ Home
+@app.route('/')
+def home():
+    return "HungerBridge Backend Running 🚀"
+
+
+# Run server
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
