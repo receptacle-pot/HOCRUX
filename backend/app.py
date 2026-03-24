@@ -12,7 +12,12 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["hungerbridge"]
 foods = db["foods"]
 
-# ➤ Add Food
+# Startup Message on start window
+@app.route('/')
+def home():
+    return "HungerBridge Backend Running 🚀"
+
+#Adding food page
 @app.route('/food', methods=['POST'])
 def add_food():
     data = request.json
@@ -29,7 +34,7 @@ def add_food():
     foods.insert_one(food)
     return jsonify({"message": "Food Added"})
 
-# ➤ Get Food
+# Get all food items
 @app.route('/food', methods=['GET'])
 def get_food():
     data = []
@@ -38,7 +43,7 @@ def get_food():
         data.append(f)
     return jsonify(data)
 
-# ➤ Claim Food
+#Clain food page
 @app.route('/claim/<id>', methods=['POST'])
 def claim_food(id):
     foods.update_one(
@@ -47,7 +52,7 @@ def claim_food(id):
     )
     return jsonify({"message": "Claimed"})
 
-# ➤ Deliver Food
+#Deliver food page
 @app.route('/deliver/<id>', methods=['POST'])
 def deliver_food(id):
     foods.update_one(
@@ -56,7 +61,7 @@ def deliver_food(id):
     )
     return jsonify({"message": "Delivered"})
 
-# ➤ Cleanup expired
+#Cleanup page to remove expired food items
 @app.route('/cleanup', methods=['GET'])
 def cleanup():
     now = datetime.datetime.utcnow()
