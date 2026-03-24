@@ -8,38 +8,66 @@
 
 <div class="container">
   <h2>Available Food</h2>
+
+  <input id="search" placeholder="Search location..." onkeyup="loadFood()">
+
   <div id="list"></div>
 </div>
 
 <script>
-function loadFood() {
-  fetch("http://127.0.0.1:5000/food")
-    .then(res => res.json())
-    .then(data => {
-      let html = "";
-      data.forEach(f => {
-        if(f.status === "available") {
-          html += `
-            <div class="card">
-                <h3>${f.title}</h3>
-                <p> ${f.quantity}</p>
-                <p> ${f.location}</p>
-                <span class="badge available">Available</span>
-                <button onclick="claim(${f.id})"> Claim</button>
-            </div>
-        `;
-        }
-      });
-      document.getElementById("list").innerHTML = html;
-    });
+function startTimer(id, expiry) {
+  function update() {
+    let diff = new Date(expiry) - new Date();
+    if(diff <= 0) {
+      document.getElementById("timer-"+id).innerText = "Expired";
+      return;
+    }
+    let m = Math.floor(diff/60000);
+    let s = Math.floor((diff%60000)/1000);
+    document.getElementById("timer-"+id).innerText = m+"m "+s+"s";
+    setTimeout(update,1000);
+  }
+  update();
 }
 
-function claim(id) {
-  fetch("http://127.0.0.1:5000/claim/" + id, {method:"POST"})
-    .then(() => {
-      alert("Claimed!");
-      loadFood();
+function loadFood() {
+  fetch("http://127.0.0.1:5000/food")
+  .then(res=>res.json())
+  .then(data=>{
+    let html="";
+    let search = document.getElementById("search").value.toLowerCase();
+
+    data.forEach(f=>{
+      if(f.status==="available" && f.location.toLowerCase().includes(search)){
+
+        let warn = (new Date(f.expiry)-new Date()<1800000) ? "⚠️ Expiring Soon!" : "";
+
+        html+=`
+        <div class="card">
+          <h3>${f.title}</h3>
+          <p>${f.quantity}</p>
+          <p>${f.location}</p>
+          <p>⭐ ${f.quality}</p>
+          <p id="timer-${f.id}"></p>
+          <p style="color:red">${warn}</p>
+          <button onclick="claim(${f.id})">Claim</button>
+        </div>`;
+      }
     });
+
+    document.getElementById("list").innerHTML=html;
+
+    data.forEach(f=>{
+      if(f.status==="available"){
+        setTimeout(()=>startTimer(f.id,f.expiry),100);
+      }
+    });
+  });
+}
+
+function claim(id){
+  fetch("http://127.0.0.1:5000/claim/"+id,{method:"POST"})
+  .then(()=>loadFood());
 }
 
 loadFood();

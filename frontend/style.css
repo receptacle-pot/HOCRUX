@@ -1,7 +1,6 @@
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #000000, #1a1a1a);
-  margin: 0;
+  background: linear-gradient(135deg, #000, #1a1a1a);
   color: white;
 }
 
@@ -13,19 +12,17 @@ body {
   text-align: center;
 }
 
-h2 {
-  margin-bottom: 20px;
-  color: #00E676;
-}
-
 .card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.05);
   padding: 15px;
   margin: 15px 0;
   border-radius: 15px;
-  text-align: left;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+  transform: scale(1.03);
+  transition: 0.3s;
 }
 
 input, select {
@@ -33,38 +30,16 @@ input, select {
   padding: 12px;
   margin: 8px 0;
   border-radius: 10px;
-  border: none;
-  outline: none;
   background: #2a2a2a;
   color: white;
+  border: none;
 }
 
 button {
-  width: 100%;
   padding: 12px;
-  margin-top: 10px;
+  width: 100%;
   border-radius: 10px;
-  border: none;
   background: #00C853;
   color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
+  border: none;
 }
-
-button:hover {
-  background: #00E676;
-  transform: scale(1.05);
-}
-
-.badge {
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  display: inline-block;
-  margin-top: 5px;
-}
-
-.available { background: orange; }
-.claimed { background: #2979FF; }
-.delivered { background: #00E676; }

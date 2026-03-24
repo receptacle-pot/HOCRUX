@@ -7,9 +7,14 @@
 <body>
 
 <div class="container">
-  <h1>Hunger Bridge</h1>
-  <p style="color:#aaa;">Saving food. Saving lives.</p>
-  <p>Connecting surplus food to those in need</p>
+  <h1> Hunger Bridge</h1>
+  <p>Saving food. Saving lives.</p>
+
+  <div class="card">
+    <h3> Impact</h3>
+    <p id="total"></p>
+    <p id="delivered"></p>
+  </div>
 
   <select id="role">
     <option value="donor"> Donor</option>
@@ -23,11 +28,20 @@
 <script>
 function go() {
   let role = document.getElementById("role").value;
-
-  if(role === "donor") location.href = "donor.html";
-  if(role === "ngo") location.href = "ngo.html";
-  if(role === "volunteer") location.href = "volunteer.html";
+  location.href = role + ".html";
 }
+
+fetch("http://127.0.0.1:5000/food")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("total").innerText =
+      "Total Food Posts: " + data.length;
+
+    let delivered = data.filter(f => f.status === "delivered").length;
+
+    document.getElementById("delivered").innerText =
+      "Meals Delivered: " + delivered;
+  });
 </script>
 
 </body>

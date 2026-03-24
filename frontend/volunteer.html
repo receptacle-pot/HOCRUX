@@ -12,33 +12,29 @@
 </div>
 
 <script>
-function loadTasks() {
+function loadTasks(){
   fetch("http://127.0.0.1:5000/food")
-    .then(res => res.json())
-    .then(data => {
-      let html = "";
-      data.forEach(f => {
-        if(f.status === "claimed") {
-          html += `
-            <div class="card">
-                <h3>${f.title}</h3>
-                <p> ${f.location}</p>
-                <span class="badge claimed">Claimed</span>
-                <button onclick="deliver(${f.id})"> Deliver</button>
-            </div>
-        `;
-        }
-      });
-      document.getElementById("tasks").innerHTML = html;
+  .then(res=>res.json())
+  .then(data=>{
+    let html="";
+    data.forEach(f=>{
+      if(f.status==="claimed"){
+        html+=`
+        <div class="card">
+          <h3>${f.title}</h3>
+          <p>${f.location}</p>
+          <p>⭐ ${f.quality}</p>
+          <button onclick="deliver(${f.id})">Deliver</button>
+        </div>`;
+      }
     });
+    document.getElementById("tasks").innerHTML=html;
+  });
 }
 
-function deliver(id) {
-  fetch("http://127.0.0.1:5000/deliver/" + id, {method:"POST"})
-    .then(() => {
-      alert("Delivered!");
-      loadTasks();
-    });
+function deliver(id){
+  fetch("http://127.0.0.1:5000/deliver/"+id,{method:"POST"})
+  .then(()=>loadTasks());
 }
 
 loadTasks();

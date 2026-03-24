@@ -7,28 +7,35 @@
 <body>
 
 <div class="container">
-  <h2> Post Food</h2>
+  <h2>🍛 Post Food</h2>
 
   <input id="title" placeholder="Food Name">
   <input id="quantity" placeholder="Quantity">
   <input id="location" placeholder="Location">
 
-  <button onclick="postFood()"> Post Food</button>
+  <p>Quality:</p>
+  <label><input type="radio" name="quality" value="Good" checked> Good</label><br>
+  <label><input type="radio" name="quality" value="Better"> Better</label><br>
+  <label><input type="radio" name="quality" value="Best"> Best</label><br>
+  <label><input type="radio" name="quality" value="Excellent"> Excellent</label>
+
+  <button onclick="postFood()">Post</button>
 </div>
 
 <script>
 function postFood() {
+  let quality = document.querySelector('input[name="quality"]:checked').value;
+
   fetch("http://127.0.0.1:5000/food", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
       title: document.getElementById("title").value,
       quantity: document.getElementById("quantity").value,
-      location: document.getElementById("location").value
+      location: document.getElementById("location").value,
+      quality: quality
     })
-  })
-  .then(res => res.json())
-  .then(() => alert("Food Posted!"));
+  }).then(() => alert("Posted"));
 }
 </script>
 
