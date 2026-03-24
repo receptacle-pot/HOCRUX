@@ -1,38 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Donor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hunger Bridge — Donor</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  <h2> Post Food</h2>
+<canvas id="particles"></canvas>
 
-  <input id="title" placeholder="Food Name">
-  <input id="quantity" placeholder="Quantity">
-  <input id="location" placeholder="Location">
+<div id="header-mount"></div>
 
+<div class="app-body" id="page-body"></div>
 
-  <button onclick="postFood()">Post</button>
-</div>
+<div id="toast-container"></div>
 
+<script src="script.js"></script>
 <script>
-function postFood() {
-  let quality = document.querySelector('input[name="quality"]:checked').value;
+  // Inject shared header
+  document.getElementById('header-mount').innerHTML = renderHeader('🌾 Donor', 'donor');
 
-  fetch("http://127.0.0.1:5000/food", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      title: document.getElementById("title").value,
-      quantity: document.getElementById("quantity").value,
-      location: document.getElementById("location").value,
-      quality: quality
-    })
-  }).then(() => alert("Posted"));
-}
+  function renderPage() {
+    const foods = getFoods();
+    const stats = {
+      available: foods.filter(f => f.status === 'available').length,
+      claimed:   foods.filter(f => f.status === 'claimed').length,
+      delivered: foods.filter(f => f.status === 'delivered').length,
+    };
+
+    document.getElementById('page-body').innerHTML = `
+      <div class="stats-row">
+        <div class="stat-card green">
+          <div class="stat-card-num">${stats.available}</div>
+          <div class="stat-card-label">Available</div>
+          <div class="stat-card-delta">↑ Live listings</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-card-num">${stats.claimed}</div>
+          <div class="stat-card-label">Claimed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" style="color:var(--text)">${stats.delivered}</div>
+          <div class="stat-card-label">Delivered</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-card-num">${Math.round(stats.delivered * 2.3)}</div>
+          <div class="stat-card-label">kg CO₂ Saved</div>
+        </div>
+      </div>
+
+      ${renderMap()}
+
+      <div class="section-title">Post Surplus Food</div>
+      <div class="post-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Food Name</label>
+            <input id="f-title" placeholder="e.g. Wedding Biryani, Bread Loaves…">
+          </div>
+          <div class="form-field">
+            <label>Quantity</label>
+            <input id="f-qty" placeholder="e.g. 50 servings, 10 kg">
+          </div>
+          <div class="form-field">
+            <label>Location / Address</label>
+            <input id="f-loc" placeholder="e.g. 12 MG Road, Sangli">
+          </div>
+          <div class="form-field">
+            <label>Category</label>
+            <select id="f-cat">
+              <option>Cooked Meals</option>
+              <option>Bakery</option>
+              <option>Produce</option>
+              <option>Packaged</option>
+              <option>Sweets</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-field full">
+            <label>Special Notes</label>
+            <input id="f-notes" placeholder="Dietary info, handling instructions, etc.">
+          </div>
+        </div>
+        <p class="expiry-note">⏱ Listing auto-expires in 2 hours. NGOs will be instantly notified on posting.</p>
+        <button class="btn-primary" onclick="postFood()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Post Food Now
+        </button>
+      </div>
+
+      <div class="section-title">All Listings <span class="count-badge">${foods.length}</span></div>
+      <div class="food-grid" id="food-list">
+        ${foods.map(f => renderFoodCard(f, 'donor')).join('')}
+      </div>`;
+  }
+
+  function postFood() {
+    const title = document.getElementById('f-title').value.trim();
+    const qty   = document.getElementById('f-qty').value.trim();
+    const loc   = document.getElementById('f-loc').value.trim();
+    const cat   = document.getElementById('f-cat').value;
+    if (!title || !qty || !loc) { toast('Please fill in all required fields', 'warn', '⚠'); return; }
+
+    const foods = getFoods();
+    foods.push({
+      id:       Date.now(),
+      title, quantity: qty, location: loc, category: cat,
+      status:   'available',
+      expiry:   Date.now() + 2 * 3600000,
+      posted:   Date.now(),
+      donor:    'You',
+      priority: (qty.includes('kg') && parseInt(qty) > 20) ? 'high' : 'medium',
+      lat:      16.864 + (Math.random() - 0.5) * 0.05,
+      lng:      74.571 + (Math.random() - 0.5) * 0.05,
+    });
+    saveFoods(foods);
+    addNotif('green', 'Food Posted Successfully', `${title} — ${qty} listed for ${loc}`);
+    toast(`"${title}" posted! NGOs notified instantly.`, 'success', '🌾');
+    ['f-title','f-qty','f-loc','f-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    renderPage();
+  }
+
+  renderPage();
 </script>
-
 </body>
 </html>
