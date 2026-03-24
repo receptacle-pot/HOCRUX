@@ -21,12 +21,13 @@ function loadFood() {
         if(f.status === "available") {
           html += `
             <div class="card">
-              <h3>${f.title}</h3>
-              <p>${f.quantity}</p>
-              <p>${f.location}</p>
-              <button onclick="claim(${f.id})">Claim</button>
+                <h3>${f.title}</h3>
+                <p>🍽 ${f.quantity}</p>
+                <p>📍 ${f.location}</p>
+                <span class="badge available">Available</span>
+                <button onclick="claim(${f.id})">🤝 Claim</button>
             </div>
-          `;
+        `;
         }
       });
       document.getElementById("list").innerHTML = html;

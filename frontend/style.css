@@ -1,31 +1,67 @@
 body {
-  font-family: Arial;
-  background: #f4f4f4;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  margin: 0;
+  color: white;
 }
 
 .container {
-  width: 80%;
+  width: 90%;
+  max-width: 600px;
   margin: auto;
   padding: 20px;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20px;
 }
 
 .card {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   padding: 15px;
-  margin: 10px 0;
-  border-radius: 10px;
-}
-
-button {
-  background: green;
-  color: white;
-  padding: 10px;
-  border: none;
-  cursor: pointer;
+  margin: 15px 0;
+  border-radius: 15px;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 input, select {
-  padding: 10px;
-  margin: 5px 0;
   width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+  outline: none;
 }
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #00C853;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00E676;
+  transform: scale(1.05);
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.available { background: orange; }
+.claimed { background: blue; }
+.delivered { background: green; }
