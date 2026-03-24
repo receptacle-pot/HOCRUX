@@ -1,44 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Volunteer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HungerBridge — Volunteer</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  <h2>Delivery Tasks</h2>
-  <div id="tasks"></div>
-</div>
+<canvas id="particles"></canvas>
 
+<div id="header-mount"></div>
+
+<div class="app-body" id="page-body"></div>
+
+<div id="toast-container"></div>
+
+<script src="script.js"></script>
 <script>
-function loadTasks(){
-  fetch("http://127.0.0.1:5000/food")
-  .then(res=>res.json())
-  .then(data=>{
-    let html="";
-    data.forEach(f=>{
-      if(f.status==="claimed"){
-        html+=`
-        <div class="card">
-          <h3>${f.title}</h3>
-          <p>${f.location}</p>
-          <p>⭐ ${f.quality}</p>
-          <button onclick="deliver(${f.id})">Deliver</button>
-        </div>`;
-      }
-    });
-    document.getElementById("tasks").innerHTML=html;
-  });
-}
+  document.getElementById('header-mount').innerHTML = renderHeader('🚴 Volunteer', 'volunteer');
 
-function deliver(id){
-  fetch("http://127.0.0.1:5000/deliver/"+id,{method:"POST"})
-  .then(()=>loadTasks());
-}
+  function renderPage() {
+    const foods     = getFoods();
+    const claimed   = foods.filter(f => f.status === 'claimed');
+    const delivered = foods.filter(f => f.status === 'delivered');
 
-loadTasks();
+    document.getElementById('page-body').innerHTML = `
+      <div class="stats-row">
+        <div class="stat-card amber">
+          <div class="stat-card-num">${claimed.length}</div>
+          <div class="stat-card-label">Pending Tasks</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-card-num">${delivered.length}</div>
+          <div class="stat-card-label">Completed</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-card-num">${Math.round(delivered.length * 1.8)}</div>
+          <div class="stat-card-label">km Covered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" style="color:var(--text)">${Math.round(delivered.length * 23)}</div>
+          <div class="stat-card-label">Meals Delivered</div>
+        </div>
+      </div>
+
+      ${renderMap()}
+
+      <div class="section-title">Delivery Tasks <span class="count-badge">${claimed.length}</span></div>
+      <div class="food-grid" id="food-list">
+        ${claimed.map(f => renderFoodCard(f, 'volunteer')).join('')}
+        ${claimed.length === 0
+          ? `<div class="empty-state">
+               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                 <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+               </svg>
+               <p>All deliveries complete!<br>Great work.</p>
+             </div>` : ''}
+      </div>
+
+      ${delivered.length > 0 ? `
+        <div class="history-section">
+          <div class="section-title">Completed</div>
+          ${delivered.map(f => `
+            <div class="history-item">
+              <div class="history-info">
+                <h4>${f.title}</h4>
+                <p>${f.location}</p>
+              </div>
+              <span class="status-badge delivered">Delivered ✓</span>
+            </div>`).join('')}
+        </div>` : ''}`;
+  }
+
+  renderPage();
 </script>
-
 </body>
 </html>
