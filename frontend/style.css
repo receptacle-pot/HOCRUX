@@ -1,6 +1,6 @@
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  background: linear-gradient(135deg, #000000, #1a1a1a);
   margin: 0;
   color: white;
 }
@@ -15,16 +15,17 @@ body {
 
 h2 {
   margin-bottom: 20px;
+  color: #00E676;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   padding: 15px;
   margin: 15px 0;
   border-radius: 15px;
   text-align: left;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 input, select {
@@ -34,6 +35,8 @@ input, select {
   border-radius: 10px;
   border: none;
   outline: none;
+  background: #2a2a2a;
+  color: white;
 }
 
 button {
@@ -63,5 +66,5 @@ button:hover {
 }
 
 .available { background: orange; }
-.claimed { background: blue; }
-.delivered { background: green; }
+.claimed { background: #2979FF; }
+.delivered { background: #00E676; }
