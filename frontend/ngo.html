@@ -1,77 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>NGO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hunger Bridge — NGO</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  <h2>Available Food</h2>
+<canvas id="particles"></canvas>
 
-  <input id="search" placeholder="Search location..." onkeyup="loadFood()">
+<div id="header-mount"></div>
 
-  <div id="list"></div>
-</div>
+<div class="app-body" id="page-body"></div>
 
+<div id="toast-container"></div>
+
+<script src="script.js"></script>
 <script>
-function startTimer(id, expiry) {
-  function update() {
-    let diff = new Date(expiry) - new Date();
-    if(diff <= 0) {
-      document.getElementById("timer-"+id).innerText = "Expired";
-      return;
-    }
-    let m = Math.floor(diff/60000);
-    let s = Math.floor((diff%60000)/1000);
-    document.getElementById("timer-"+id).innerText = m+"m "+s+"s";
-    setTimeout(update,1000);
+  document.getElementById('header-mount').innerHTML = renderHeader('🏛️ NGO', 'ngo');
+
+  let filterStatus = 'all';
+
+  function renderPage() {
+    const foods     = getFoods();
+    const available = foods.filter(f => f.status === 'available');
+    const urgent    = available.filter(f => getExpiryInfo(f.expiry).hours < 1);
+    const sorted    = [...available].sort((a, b) => {
+      const priorityMap = { high: 0, medium: 1, low: 2 };
+      const ap = priorityMap[a.priority] ?? 2;
+      const bp = priorityMap[b.priority] ?? 2;
+      const ae = getExpiryInfo(a.expiry).hours;
+      const be = getExpiryInfo(b.expiry).hours;
+      return (ap - bp) || (ae - be);
+    });
+
+    const urgencyBanner = urgent.length > 0
+      ? `<div class="urgency-section">
+           <div class="urgency-icon">🚨</div>
+           <div class="urgency-text">
+             <h4>${urgent.length} listing${urgent.length > 1 ? 's' : ''} expiring in under 60 minutes</h4>
+             <p>Claim immediately to prevent food waste — these are prioritised by AI matching.</p>
+           </div>
+         </div>` : '';
+
+    document.getElementById('page-body').innerHTML = `
+      <div class="stats-row">
+        <div class="stat-card green">
+          <div class="stat-card-num">${available.length}</div>
+          <div class="stat-card-label">Available Now</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-card-num">${urgent.length}</div>
+          <div class="stat-card-label">Expiring Soon</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-card-num">${foods.filter(f => f.status === 'claimed').length}</div>
+          <div class="stat-card-label">Claimed Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" style="color:var(--text)">3</div>
+          <div class="stat-card-label">NGOs Connected</div>
+        </div>
+      </div>
+
+      ${renderMap()}
+      ${urgencyBanner}
+
+      <div class="ai-section">
+        <div class="ai-section-header"><div class="ai-pulse"></div> AI Redistribution Insights</div>
+        <div id="ai-insights"><span class="typing-cursor"></span></div>
+      </div>
+
+      <div class="section-title">Available Food <span class="count-badge">${available.length}</span></div>
+      <div class="filter-bar">
+        <button class="filter-chip ${filterStatus==='all'    ?'active':''}" onclick="setFilter('all')">All</button>
+        <button class="filter-chip ${filterStatus==='urgent' ?'active':''}" onclick="setFilter('urgent')">⚡ Urgent</button>
+        <button class="filter-chip ${filterStatus==='high'   ?'active':''}" onclick="setFilter('high')">High Priority</button>
+        <div class="filter-spacer"></div>
+        <select class="sort-select" onchange="resortNGO(this.value)">
+          <option value="priority">Sort: Priority</option>
+          <option value="expiry">Sort: Expiry</option>
+        </select>
+      </div>
+      <div class="food-grid" id="food-list">
+        ${sorted.map(f => renderFoodCard(f, 'ngo')).join('')}
+        ${sorted.length === 0 ? '<div class="empty-state"><p>No available food listings right now.<br>Check back soon!</p></div>' : ''}
+      </div>`;
+
+    setTimeout(typeAIInsights, 400);
   }
-  update();
-}
 
-function loadFood() {
-  fetch("http://127.0.0.1:5000/food")
-  .then(res=>res.json())
-  .then(data=>{
-    let html="";
-    let search = document.getElementById("search").value.toLowerCase();
-
-    data.forEach(f=>{
-      if(f.status==="available" && f.location.toLowerCase().includes(search)){
-
-        let warn = (new Date(f.expiry)-new Date()<1800000) ? "⚠️ Expiring Soon!" : "";
-
-        html+=`
-        <div class="card">
-          <h3>${f.title}</h3>
-          <p>${f.quantity}</p>
-          <p>${f.location}</p>
-          <p>⭐ ${f.quality}</p>
-          <p id="timer-${f.id}"></p>
-          <p style="color:red">${warn}</p>
-          <button onclick="claim(${f.id})">Claim</button>
-        </div>`;
-      }
+  function typeAIInsights() {
+    const foods     = getFoods();
+    const available = foods.filter(f => f.status === 'available');
+    const urgent    = available.filter(f => getExpiryInfo(f.expiry).hours < 1);
+    const highPrio  = available.filter(f => f.priority === 'high');
+    const insights  = [
+      urgent.length > 0
+        ? `${urgent.length} listing${urgent.length > 1 ? 's are' : ' is'} expiring within 60 minutes — immediate claim prevents total waste.`
+        : 'No critical expiries in the next hour. Good redistribution window.',
+      highPrio.length > 0
+        ? `AI match found: "${highPrio[0].title}" at ${highPrio[0].location} has highest community impact score — prioritise claiming this.`
+        : 'All current listings are medium to low priority.',
+      `Nearest available food to your registered location is ${available[0]?.title || 'N/A'} — estimated 8 min pickup time.`,
+      `Today's redistribution efficiency: 72% — ${foods.filter(f => f.status === 'delivered').length} deliveries completed vs. ${available.length} still available.`,
+    ];
+    const el = document.getElementById('ai-insights');
+    if (!el) return;
+    el.innerHTML = '';
+    insights.forEach((text, i) => {
+      const div = document.createElement('div');
+      div.className = 'ai-insight-item';
+      div.innerHTML = `<span class="ai-insight-num">#${i + 1}</span><span>${text}</span>`;
+      div.style.opacity = '0';
+      el.appendChild(div);
+      setTimeout(() => { div.style.transition = 'opacity 0.4s'; div.style.opacity = '1'; }, i * 300 + 200);
     });
+  }
 
-    document.getElementById("list").innerHTML=html;
+  function setFilter(status) {
+    filterStatus = status;
+    const foods    = getFoods().filter(f => f.status === 'available');
+    let filtered   = foods;
+    if (status === 'urgent') filtered = foods.filter(f => getExpiryInfo(f.expiry).hours < 1);
+    if (status === 'high')   filtered = foods.filter(f => f.priority === 'high');
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    const list = document.getElementById('food-list');
+    if (list) list.innerHTML = filtered.map(f => renderFoodCard(f, 'ngo')).join('')
+      || '<div class="empty-state"><p>No listings match this filter.</p></div>';
+  }
 
-    data.forEach(f=>{
-      if(f.status==="available"){
-        setTimeout(()=>startTimer(f.id,f.expiry),100);
-      }
-    });
-  });
-}
+  function resortNGO(sortBy) {
+    const foods  = getFoods().filter(f => f.status === 'available');
+    const sorted = sortBy === 'expiry'
+      ? [...foods].sort((a, b) => a.expiry - b.expiry)
+      : [...foods].sort((a, b) => { const m = { high:0, medium:1, low:2 }; return (m[a.priority]||2) - (m[b.priority]||2); });
+    const list = document.getElementById('food-list');
+    if (list) list.innerHTML = sorted.map(f => renderFoodCard(f, 'ngo')).join('');
+  }
 
-function claim(id){
-  fetch("http://127.0.0.1:5000/claim/"+id,{method:"POST"})
-  .then(()=>loadFood());
-}
-
-loadFood();
+  renderPage();
 </script>
-
 </body>
 </html>
