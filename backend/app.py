@@ -6,11 +6,16 @@ import datetime
 app = Flask(__name__)
 CORS(app)
 
-# DB connection
+# -------------------------------
+# DATABASE CONNECTION
+# -------------------------------
 def get_db():
     return sqlite3.connect("hungerbridge.db")
 
-# Create table
+
+# -------------------------------
+# CREATE TABLE (RUNS AUTOMATICALLY)
+# -------------------------------
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
@@ -31,17 +36,23 @@ def init_db():
 
 init_db()
 
-# Home
+
+# -------------------------------
+# HOME ROUTE (TEST)
+# -------------------------------
 @app.route('/')
 def home():
     return "HungerBridge Backend Running 🚀"
 
-# Add food
+
+# -------------------------------
+# ADD FOOD (DONOR)
+# -------------------------------
 @app.route('/food', methods=['POST'])
 def add_food():
     data = request.json
 
-    expiry = (datetime.datetime.now() + datetime.timedelta(hours=2)).isoformat()
+    expiry_time = (datetime.datetime.now() + datetime.timedelta(hours=2)).isoformat()
 
     conn = get_db()
     cursor = conn.cursor()
@@ -49,14 +60,23 @@ def add_food():
     cursor.execute("""
     INSERT INTO food (title, quantity, location, status, expiry)
     VALUES (?, ?, ?, ?, ?)
-    """, (data['title'], data['quantity'], data['location'], "available", expiry))
+    """, (
+        data['title'],
+        data['quantity'],
+        data['location'],
+        "available",
+        expiry_time
+    ))
 
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Food Added"})
+    return jsonify({"message": "Food Added Successfully"})
 
-# Get food
+
+# -------------------------------
+# GET ALL FOOD (NGO + VOLUNTEER)
+# -------------------------------
 @app.route('/food', methods=['GET'])
 def get_food():
     conn = get_db()
@@ -65,9 +85,9 @@ def get_food():
     cursor.execute("SELECT * FROM food")
     rows = cursor.fetchall()
 
-    data = []
+    result = []
     for row in rows:
-        data.append({
+        result.append({
             "id": row[0],
             "title": row[1],
             "quantity": row[2],
@@ -77,31 +97,70 @@ def get_food():
         })
 
     conn.close()
-    return jsonify(data)
+    return jsonify(result)
 
-# Claim
+
+# -------------------------------
+# CLAIM FOOD (NGO)
+# -------------------------------
 @app.route('/claim/<int:id>', methods=['POST'])
 def claim_food(id):
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("UPDATE food SET status='claimed' WHERE id=?", (id,))
+    cursor.execute(
+        "UPDATE food SET status = 'claimed' WHERE id = ?",
+        (id,)
+    )
+
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Claimed"})
+    return jsonify({"message": "Food Claimed"})
 
-# Deliver
+
+# -------------------------------
+# DELIVER FOOD (VOLUNTEER)
+# -------------------------------
 @app.route('/deliver/<int:id>', methods=['POST'])
 def deliver_food(id):
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("UPDATE food SET status='delivered' WHERE id=?", (id,))
+    cursor.execute(
+        "UPDATE food SET status = 'delivered' WHERE id = ?",
+        (id,)
+    )
+
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Delivered"})
+    return jsonify({"message": "Food Delivered"})
 
+
+# -------------------------------
+# DELETE EXPIRED FOOD (OPTIONAL)
+# -------------------------------
+@app.route('/cleanup', methods=['GET'])
+def cleanup():
+    now = datetime.datetime.now().isoformat()
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM food WHERE expiry < ?",
+        (now,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Expired food removed"})
+
+
+# -------------------------------
+# RUN SERVER
+# -------------------------------
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
